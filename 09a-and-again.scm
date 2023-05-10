@@ -151,6 +151,10 @@
 (A 1 1)
 
 ; length0 - the function below can only determine the length of an empty list
+; a function without a name (define ...) is called a lambda expression
+; scheme allows the use of "first class functions" - passing a function 
+; into another function as an argument
+
 
 (lambda (l)
   (cond
@@ -224,6 +228,8 @@
       ((mk-length mk-length) x)))))
 
 ; applicative-order Y combinator
+; Y combinator is a higher order function which takes a function that isn't recursive
+; and returns a version of the function that is recursive
 
 (define Y
   (lambda (le)
