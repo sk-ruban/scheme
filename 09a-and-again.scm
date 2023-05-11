@@ -19,7 +19,8 @@
       (else
         (pick (sub1 n) (cdr lat))))))
 
-; `looking` is a partial function where it may recur for eternity
+; 'looking` keeps moving to the index of the number picked
+; it is a partial function which may recur indefinitly
 
 (define looking
   (lambda (a lat)
@@ -30,20 +31,19 @@
 (define keep-looking
   (lambda (a sorn lat)
     (cond
-      ((number? sorn)
-       (keep-looking a (pick sorn lat) lat))
+      ((number? sorn) (keep-looking a (pick sorn lat) lat))
       (else (eq? sorn a )))))
 
-(looking 'caviar '(6 2 4 caviar 5 7 3))   
+(looking 'caviar '(6 2 4 caviar 5 7 3))      ; #t
+(looking 'caviar '(6 2 grits caviar 5 7 3))  ; #f because of grits
 
-; another partial function - which never reaches its goal
+; `eternity` - another partial function which never reaches its goal
 
 (define eternity
   (lambda (x)
     (eternity x)))
 
 ; `shift` shifts the second part of the first component into the second component
-; note that it is not even recursive!
 
 (define first
   (lambda (p)
@@ -81,10 +81,8 @@
   (lambda (pora)
     (cond
       ((atom? pora) pora)
-      ((a-pair? (first pora))
-       (align (shift pora)))
-      (else (build (first pora)
-              (align (second pora)))))))
+      ((a-pair? (first pora)) (align (shift pora)))
+      (else (build (first pora) (align (second pora)))))))
 
 (define length*
   (lambda (pora)
@@ -102,8 +100,11 @@
         (+ (* (weight* (first pora)) 2)
            (weight* (second pora)))))))
 
-(weight* '((a b) c))
-(weight* '(a (b c)))
+(weight* '((a b) c)) ; (2+1)*2 + 1 = 7
+(weight* '(a (b c))) ; (1*2) + (2+1) = 5
+
+; `shuffle` swaps the components of the pairs if the first component is a pair
+; it is not a total function as the swap indefinitely in some cases
 
 (define revpair
   (lambda (p)
@@ -113,11 +114,9 @@
   (lambda (pora)
     (cond
       ((atom? pora) pora)
-      ((a-pair? (first pora))
-       (shuffle (revpair pora)))
+      ((a-pair? (first pora)) (shuffle (revpair pora)))
       (else
-        (build (first pora)
-          (shuffle (second pora)))))))
+        (build (first pora) (shuffle (second pora)))))))
 
 (shuffle '(a (b c)))
 (shuffle '(a b))
@@ -126,7 +125,7 @@
 (define one?
   (lambda (n) (= n 1)))
 
-; `C` is not a total function
+; Not sure if `C` is a total function (Collatz Conjecture)
 
 (define C
   (lambda (n)
@@ -138,23 +137,23 @@
           (else
             (C (add1 (* 3 n)))))))))
 
+; Ackermann Function
+
 (define A
   (lambda (n m)
     (cond
       ((zero? n) (add1 m))
       ((zero? m) (A (sub1 n) 1))
       (else
-        (A (sub1 n)
-           (A n (sub1 m)))))))
+        (A (sub1 n) (A n (sub1 m)))))))
 
-(A 1 0) 
-(A 1 1)
+(A 1 0) ; 2
+(A 1 1) ; = (A 0 (A 1 0)) = (A 0 2) = 3
 
 ; length0 - the function below can only determine the length of an empty list
 ; a function without a name (define ...) is called a lambda expression
 ; scheme allows the use of "first class functions" - passing a function 
 ; into another function as an argument
-
 
 (lambda (l)
   (cond
